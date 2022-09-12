@@ -1,0 +1,27 @@
+#! /bin/bash
+APP=$1
+BINTMP=/tmp/$APP
+MIRROR=../../mirror_guardator
+TRG_DIR=linux/x64/release
+if [ -z "$APP" ]; then
+  echo "Usage: Compile APP"
+  echo "Example: Compile scrambler"
+else
+  rsync -auv --delete ./ $MIRROR/tools 
+  rsync -auv --delete ../lib/ $MIRROR/lib 
+  CURDIR=$(pwd)
+  cd $MIRROR/tools/bin
+  for file in $APP.dart cipher.dart data_safe_custom.dart; do
+    scrambler shuffle  $file $file
+    ls -ld $file
+  done
+  cd ..
+  dart compile exe bin/$APP.dart -o $BINTMP
+  sudo cp $BINTMP /usr/local/bin/$APP
+  ls -ld /usr/local/bin/$APP
+  cd $CURDIR
+  mkdir -p $TRG_DIR
+  cp -a $BINTMP $TRG_DIR
+  ls -ld $TRG_DIR/$APP
+fi
+  
